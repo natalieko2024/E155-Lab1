@@ -35,8 +35,6 @@ int main(void) {
     // 2. Configure EXTICR for the input button interrupt
     // EXTI7 is bits 14:12 of EXTICR2 (EXTICR[1] in C). Port A is 0b000, so clearing the field selects PA6.
     SYSCFG->EXTICR[1] &= ~(0b111 << 8);
-    // PA9
-    SYSCFG->EXTICR[2] &= ~(0b111 << 4);
 
     // Enable interrupts globally
     __enable_irq();
@@ -48,11 +46,13 @@ int main(void) {
     NVIC->ISER[0] |= (1 << 23);                       // 4. Turn on EXTI interrupt in NVIC_ISER (EXTI9_5 is IRQ 23)
 
     while(1){
+        
+        maxCount = countTicks(SPEED_TIM, countA);
+
         if(countA >= ROTATION) {
             countA = 0;
         }
-
-        maxCount = countTicks(SPEED_TIM, countA);
+        
         speed = 10000.0f / ((float) maxCount);
 
         if (PRINT_TIM->CNT == 10000) {
@@ -64,7 +64,6 @@ int main(void) {
             PRINT_TIM->CNT = 0;      // Reset count
         }
         
-        //delay_millis(SPEED_TIM, 200);
     }
 
 }
@@ -81,9 +80,9 @@ void EXTI9_5_IRQHandler(void){
         int pinB = digitalRead(ENCODER_B_PIN);
 
         if (pinB == 0) {
-            direction = CCW;
-        } else {
             direction = CW;
+        } else {
+            direction = CCW;
         }
 
         countA++;

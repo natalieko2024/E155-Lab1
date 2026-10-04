@@ -30,7 +30,6 @@ void delay_millis(TIM_TypeDef * TIMx){
 
 int countTicks(TIM_TypeDef * TIMx, int countA) {
     int maxCount;
-    
 
     if (countA >= 408) {
         maxCount = TIMx->CNT;

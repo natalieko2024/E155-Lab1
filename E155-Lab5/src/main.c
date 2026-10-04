@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include "stm32l432xx.h"
 
+int pinB;
 int direction;
 int countA;
 int maxCount;
@@ -47,6 +48,12 @@ int main(void) {
 
     while(1){
         
+        if (pinB == 0) {
+            direction = CW;
+        } else {
+            direction = CCW;
+        }
+
         maxCount = countTicks(SPEED_TIM, countA);
 
         if(countA >= ROTATION) {
@@ -76,14 +83,7 @@ void EXTI9_5_IRQHandler(void){
         // If so, clear the interrupt (NB: Write 1 to reset.)
         EXTI->PR1 = (1 << gpioPinOffset(ENCODER_A_PIN));
 
-        int pinA = digitalRead(ENCODER_A_PIN);
-        int pinB = digitalRead(ENCODER_B_PIN);
-
-        if (pinB == 0) {
-            direction = CW;
-        } else {
-            direction = CCW;
-        }
+        pinB = digitalRead(ENCODER_B_PIN);
 
         countA++;
 

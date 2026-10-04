@@ -39,6 +39,9 @@ int main(void) {
 
     // Enable interrupts globally
     __enable_irq();
+    // set priority of interrupts
+    __NVIC_SetPriority(TIM1_BRK_TIM15_IRQn, 1);
+    __NVIC_SetPriority(EXTI9_5_IRQn, 2);
 
     // Configure interrupt for falling edge of GPIO pin for button
     EXTI->IMR1 |= (1 << gpioPinOffset(ENCODER_A_PIN));   // 1. Configure mask bit
@@ -54,15 +57,16 @@ int main(void) {
             direction = CCW;
         }
 
-        maxCount = countTicks(SPEED_TIM, countA);
+        // maxCount = countTicks(SPEED_TIM, countA);
 
-        if(countA >= ROTATION) {
-            countA = 0;
-        }
+        // if(countA >= ROTATION) {
+            
+        // }
         
-        speed = 10000.0f / ((float) maxCount);
+        speed = (float) countA / 408.0f;
 
         if (PRINT_TIM->CNT == 10000) {
+            countA = 0;
             printf("Speed: %f ", speed);
             printf("maxcount: %d ", maxCount);
             printf("counta: %d ", countA);

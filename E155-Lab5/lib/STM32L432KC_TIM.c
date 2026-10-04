@@ -28,15 +28,15 @@ void delay_millis(TIM_TypeDef * TIMx){
   while(!(TIMx->SR & 1)); // Wait for UIF to go high
 }
 
-int countTicks(TIM_TypeDef * TIMx, int countA) {
-    int maxCount;
+// int countTicks(TIM_TypeDef * TIMx, int countA) {
+//     int maxCount;
 
-    if (countA >= 408) {
-        maxCount = TIMx->CNT;
-        TIMx->SR &= ~(0x1); // Clear UIF
-        TIMx->CNT = 0;      // Reset count     
-    }
+//     if (countA >= 408) {
+//         maxCount = TIMx->CNT;
+//         TIMx->SR &= ~(0x1); // Clear UIF
+//         TIMx->CNT = 0;      // Reset count     
+//     }
 
-    return maxCount;
+//     return maxCount;
 
-}
+// }

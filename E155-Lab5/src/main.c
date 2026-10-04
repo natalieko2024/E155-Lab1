@@ -26,7 +26,7 @@ int main(void) {
 
     // Initialize timer
     RCC->APB1ENR1 |= (1 << 0); // TIM2EN
-    initTIM(SPEED_TIM, ~(0));
+    initTIM(SPEED_TIM, 4e6);
     RCC->APB2ENR |= (0b01 << 16); // TIM15EN
     initTIM(PRINT_TIM, 10000);
 
@@ -51,10 +51,12 @@ int main(void) {
         }
 
         maxCount = countTicks(SPEED_TIM, countA);
-        speed = 10000/maxCount;
+        speed = 10000.0f / ((float) maxCount);
 
         if (PRINT_TIM->CNT == 10000) {
-            printf("Speed: %d ", speed);
+            printf("Speed: %f ", speed);
+            printf("maxcount: %d ", maxCount);
+            printf("counta: %d ", countA);
             printf("Direction: %d\n", direction);
             PRINT_TIM->SR &= ~(0x1); // Clear UIF
             PRINT_TIM->CNT = 0;      // Reset count
@@ -84,6 +86,5 @@ void EXTI9_5_IRQHandler(void){
 
         countA++;
 
-        
     }
 }

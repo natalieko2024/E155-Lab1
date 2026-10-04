@@ -33,8 +33,10 @@ int main(void) {
     // 1. Enable SYSCFG clock domain in RCC
     RCC->APB2ENR |= (1 << 0); // SYSCFGEN
     // 2. Configure EXTICR for the input button interrupt
-    // EXTI7 is bits 14:12 of EXTICR2 (EXTICR[1] in C). Port A is 0b000, so clearing the field selects PA7.
-    SYSCFG->EXTICR[1] &= ~(0b111 << 12);
+    // EXTI7 is bits 14:12 of EXTICR2 (EXTICR[1] in C). Port A is 0b000, so clearing the field selects PA6.
+    SYSCFG->EXTICR[1] &= ~(0b111 << 8);
+    // PA9
+    SYSCFG->EXTICR[2] &= ~(0b111 << 4);
 
     // Enable interrupts globally
     __enable_irq();

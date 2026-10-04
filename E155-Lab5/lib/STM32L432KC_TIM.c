@@ -39,4 +39,5 @@ int countTicks(TIM_TypeDef * TIMx, int countA) {
     }
 
     return maxCount;
+
 }

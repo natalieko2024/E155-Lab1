@@ -1,0 +1,89 @@
+#include "main.h"
+#include <stdio.h>
+#include "stm32l432xx.h"
+
+int direction;
+int countA;
+int maxCount;
+float speed;
+
+// Function used by printf to send characters to the laptop
+int _write(int file, char *ptr, int len) {
+  int i = 0;
+  for (i = 0; i < len; i++) {
+    ITM_SendChar((*ptr++));
+  }
+  return len;
+}
+
+int main(void) {
+    // Enable LED as output
+    gpioEnable(GPIO_PORT_A);
+    pinMode(ENCODER_A_PIN, GPIO_INPUT);
+    pinMode(ENCODER_B_PIN, GPIO_INPUT);
+    GPIOA->PUPDR |= (0b01 << 2*gpioPinOffset(ENCODER_A_PIN)); // Set PA7 as pull-up (PUPD7 = 01)
+    GPIOA->PUPDR |= (0b01 << 2*gpioPinOffset(ENCODER_B_PIN)); // Set PA7 as pull-up (PUPD7 = 01)
+
+    // Initialize timer
+    RCC->APB1ENR1 |= (1 << 0); // TIM2EN
+    initTIM(SPEED_TIM, ~(0));
+    RCC->APB2ENR |= (0b01 << 16); // TIM15EN
+    initTIM(PRINT_TIM, 10000);
+
+    // 1. Enable SYSCFG clock domain in RCC
+    RCC->APB2ENR |= (1 << 0); // SYSCFGEN
+    // 2. Configure EXTICR for the input button interrupt
+    // EXTI7 is bits 14:12 of EXTICR2 (EXTICR[1] in C). Port A is 0b000, so clearing the field selects PA7.
+    SYSCFG->EXTICR[1] &= ~(0b111 << 12);
+
+    // Enable interrupts globally
+    __enable_irq();
+
+    // Configure interrupt for falling edge of GPIO pin for button
+    EXTI->IMR1 |= (1 << gpioPinOffset(ENCODER_A_PIN));   // 1. Configure mask bit
+    EXTI->FTSR1 &= ~(1 << gpioPinOffset(ENCODER_A_PIN)); // 2. Disable falling edge trigger
+    EXTI->RTSR1 |= (1 << gpioPinOffset(ENCODER_A_PIN));  // 3. Enable rising edge trigger
+    NVIC->ISER[0] |= (1 << 23);                       // 4. Turn on EXTI interrupt in NVIC_ISER (EXTI9_5 is IRQ 23)
+
+    while(1){
+        if(countA >= ROTATION) {
+            countA = 0;
+        }
+
+        maxCount = countTicks(SPEED_TIM, countA);
+        speed = 10000/maxCount;
+
+        if (PRINT_TIM->CNT == 10000) {
+            printf("Speed: %d ", speed);
+            printf("Direction: %d\n", direction);
+            PRINT_TIM->SR &= ~(0x1); // Clear UIF
+            PRINT_TIM->CNT = 0;      // Reset count
+        }
+        
+        //delay_millis(SPEED_TIM, 200);
+    }
+
+}
+
+// EXTI lines 5-9 share this handler
+void EXTI9_5_IRQHandler(void){
+    // Check that the button was what triggered our interrupt
+    if (EXTI->PR1 & (1 << gpioPinOffset(ENCODER_A_PIN))){
+
+        // If so, clear the interrupt (NB: Write 1 to reset.)
+        EXTI->PR1 = (1 << gpioPinOffset(ENCODER_A_PIN));
+
+        int pinA = digitalRead(ENCODER_A_PIN);
+        int pinB = digitalRead(ENCODER_B_PIN);
+
+        if (pinB == 0) {
+            direction = CCW;
+        } else {
+            direction = CW;
+        }
+
+        countA++;
+
+        
+    }
+}

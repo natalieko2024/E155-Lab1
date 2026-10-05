@@ -95,16 +95,16 @@ void EXTI9_5_IRQHandler(void){
         if (pinA == 1) {
             // Determine direction of motor spinning
             if (pinB == 0) {
-                direction = CW;
-            } else {
                 direction = CCW;
+            } else {
+                direction = CW;
             }
         } else {
             // Falling edge of A
             if (pinB == 1) {
-                direction = CW;
-            } else {
                 direction = CCW;
+            } else {
+                direction = CW;
             }
         }
 

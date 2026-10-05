@@ -46,6 +46,12 @@ int main(void) {
     EXTI->IMR1 |= (1 << gpioPinOffset(ENCODER_A_PIN));   // 1. Configure mask bit
     EXTI->FTSR1 &= ~(1 << gpioPinOffset(ENCODER_A_PIN)); // 2. Disable falling edge trigger
     EXTI->RTSR1 |= (1 << gpioPinOffset(ENCODER_A_PIN));  // 3. Enable rising edge trigger
+
+    // Configure interrupt for falling edge of GPIO pin for button
+    EXTI->IMR1 |= (1 << gpioPinOffset(ENCODER_B_PIN));   // 1. Configure mask bit
+    EXTI->FTSR1 &= ~(1 << gpioPinOffset(ENCODER_B_PIN)); // 2. Disable falling edge trigger
+    EXTI->RTSR1 |= (1 << gpioPinOffset(ENCODER_B_PIN));  // 3. Enable rising edge trigger
+
     NVIC->ISER[0] |= (1 << 23);                       // 4. Turn on EXTI interrupt in NVIC_ISER (EXTI9_5 is IRQ 23)
 
     while(1){
@@ -56,11 +62,11 @@ int main(void) {
             direction = CCW;
         }
         
-        speed = (float) countA / 408.0f;
+        speed = ((float) countA/2.0f) / 408.0f;
 
         if (PRINT_TIM->CNT == 10000) {
             countA = 0;
-            printf("Speed: %f ", speed);
+            printf("Speed (rev/s): %f ", speed);
             printf("Direction (1=CW, 0=CCW): %d\n", direction);
             PRINT_TIM->SR &= ~(0x1); // Clear UIF
             PRINT_TIM->CNT = 0;      // Reset count
@@ -79,6 +85,15 @@ void EXTI9_5_IRQHandler(void){
         EXTI->PR1 = (1 << gpioPinOffset(ENCODER_A_PIN));
 
         pinB = digitalRead(ENCODER_B_PIN);
+
+        countA++;
+
+    }
+
+    if (EXTI->PR1 & (1 << gpioPinOffset(ENCODER_B_PIN))){
+
+        // If so, clear the interrupt (NB: Write 1 to reset.)
+        EXTI->PR1 = (1 << gpioPinOffset(ENCODER_B_PIN));;
 
         countA++;
 

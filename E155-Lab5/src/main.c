@@ -61,7 +61,7 @@ int main(void) {
         if (PRINT_TIM->CNT == 10000) {
             countA = 0;
             printf("Speed: %f ", speed);
-            printf("Direction (1=CW, 0=CW): %d\n", direction);
+            printf("Direction (1=CW, 0=CCW): %d\n", direction);
             PRINT_TIM->SR &= ~(0x1); // Clear UIF
             PRINT_TIM->CNT = 0;      // Reset count
         }

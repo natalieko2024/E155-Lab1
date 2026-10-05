@@ -5,7 +5,6 @@
 int pinB;
 int direction;
 int countA;
-int maxCount;
 float speed;
 
 // Function used by printf to send characters to the laptop
@@ -56,21 +55,13 @@ int main(void) {
         } else {
             direction = CCW;
         }
-
-        // maxCount = countTicks(SPEED_TIM, countA);
-
-        // if(countA >= ROTATION) {
-            
-        // }
         
         speed = (float) countA / 408.0f;
 
         if (PRINT_TIM->CNT == 10000) {
             countA = 0;
             printf("Speed: %f ", speed);
-            printf("maxcount: %d ", maxCount);
-            printf("counta: %d ", countA);
-            printf("Direction: %d\n", direction);
+            printf("Direction (1=CW, 0=CW): %d\n", direction);
             PRINT_TIM->SR &= ~(0x1); // Clear UIF
             PRINT_TIM->CNT = 0;      // Reset count
         }

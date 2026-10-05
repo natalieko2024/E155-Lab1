@@ -21,22 +21,8 @@ void initTIM(TIM_TypeDef * TIMx, uint32_t ms){
 }
 
 void delay_millis(TIM_TypeDef * TIMx){
-  //TIMx->EGR |= 1;     // Force update
   TIMx->SR &= ~(0x1); // Clear UIF
   TIMx->CNT = 0;      // Reset count
 
   while(!(TIMx->SR & 1)); // Wait for UIF to go high
 }
-
-// int countTicks(TIM_TypeDef * TIMx, int countA) {
-//     int maxCount;
-
-//     if (countA >= 408) {
-//         maxCount = TIMx->CNT;
-//         TIMx->SR &= ~(0x1); // Clear UIF
-//         TIMx->CNT = 0;      // Reset count     
-//     }
-
-//     return maxCount;
-
-// }

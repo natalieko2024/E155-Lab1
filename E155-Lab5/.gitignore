@@ -3,3 +3,5 @@
 **/Debug/
 *.emSession
 *.jlink
+.DS_Store
+Thumbs.db

@@ -27,8 +27,8 @@ int main(void) {
     GPIOA->PUPDR |= (0b01 << 2*gpioPinOffset(ENCODER_B_PIN)); // Set PA9 as pull-up (PUPD9 = 01)
 
     // Initialize timers
-    RCC->APB1ENR1 |= (1 << 0); // TIM2EN
-    initTIM(SPEED_TIM, 4e6);
+    //RCC->APB1ENR1 |= (1 << 0); // TIM2EN
+    //initTIM(SPEED_TIM, 4e6);
     RCC->APB2ENR |= (0b01 << 16); // TIM15EN
     initTIM(PRINT_TIM, 10000);
 
@@ -95,16 +95,16 @@ void EXTI9_5_IRQHandler(void){
         if (pinA == 1) {
             // Determine direction of motor spinning
             if (pinB == 0) {
-                direction = CCW;
-            } else {
                 direction = CW;
+            } else {
+                direction = CCW;
             }
         } else {
             // Falling edge of A
             if (pinB == 1) {
-                direction = CCW;
-            } else {
                 direction = CW;
+            } else {
+                direction = CCW;
             }
         }
 
@@ -118,6 +118,27 @@ void EXTI9_5_IRQHandler(void){
 
         // If so, clear the interrupt (NB: Write 1 to reset.)
         EXTI->PR1 = (1 << gpioPinOffset(ENCODER_B_PIN));;
+
+        // Read the value of pin A and B -> this helps determine direction
+        pinA = digitalRead(ENCODER_A_PIN);
+        pinB = digitalRead(ENCODER_B_PIN);
+
+        // Rising edge of B
+        if (pinB == 1) {
+            // Determine direction of motor spinning
+            if (pinA == 1) {
+                direction = CW;
+            } else {
+                direction = CCW;
+            }
+        } else {
+            // Falling edge of B
+            if (pinA == 0) {
+                direction = CW;
+            } else {
+                direction = CCW;
+            }
+        }
 
         // Increment count of how many rising edges we have seen
         countA++;
